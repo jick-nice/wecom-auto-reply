@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
-"""打包脚本：把 client_v33 打成单文件 exe。
+"""打包脚本：把 client_v33 打成带版本号的 Windows onedir 发布包。
 
 用法：
     python build.py                      # 用当前 endpoint 地址打包
     python build.py https://xxx.vercel.app/api   # 指定后端地址后打包
 
+输出：
+    dist/抢单助手-vX.Y.Z/              # 可运行目录
+    dist/抢单助手-vX.Y.Z.zip           # 可分发压缩包
+
 做的事情：
     ① 把 app/endpoint.pyc 里的 API_BASE 替换成目标地址（备份原文件）
-    ② 跑 selftest，不通过就中止
-    ③ PyInstaller onefile + noconsole 打包
-    ④ 校验产物
+    ② 跑 selftest，不通过就中止打包
+    ③ PyInstaller onedir + noconsole 打包
+    ④ 校验产物并生成版本压缩包
 """
 from __future__ import annotations
 
@@ -29,6 +33,9 @@ if hasattr(sys.stderr, "reconfigure"):
 
 ROOT = Path(__file__).parent
 CLIENT = ROOT / "client_v33"
+VERSION_FILE = ROOT / "VERSION"
+VERSION = VERSION_FILE.read_text(encoding="utf-8").strip()
+RELEASE_NAME = f"抢单助手-v{VERSION}"
 DIST = ROOT / "dist"
 BUILD = ROOT / "build"
 ENDPOINT = CLIENT / "app" / "endpoint.pyc"
@@ -118,7 +125,7 @@ def build() -> Path | None:
         PY, "-m", "PyInstaller",
         "--noconfirm", "--clean",
         "--onedir", "--noconsole",
-        "--name", "抢单助手",
+        "--name", RELEASE_NAME,
         "--icon", str(ICON),
         "--distpath", str(DIST),
         "--workpath", str(BUILD),
@@ -146,7 +153,7 @@ def build() -> Path | None:
         print("!! 打包失败")
         return None
 
-    exe = DIST / "抢单助手" / "抢单助手.exe"
+    exe = DIST / RELEASE_NAME / f"{RELEASE_NAME}.exe"
     if not exe.exists():
         print("!! 没找到产物")
         return None
@@ -189,7 +196,10 @@ def main() -> int:
         return 4
     if not verify(exe):
         return 5
-    print("\n完成:", exe)
+    archive = shutil.make_archive(str(DIST / RELEASE_NAME), "zip", root_dir=exe.parent.parent,
+                                  base_dir=RELEASE_NAME)
+    print(f"\n完成: {exe}")
+    print(f"压缩包: {archive}")
     return 0
 
 

@@ -270,7 +270,7 @@ def selftest() -> int:
     return rc
 
 
-BUILD_ID = "20261117-R2"
+BUILD_ID = "v3.3.0"
 
 
 def verify_build() -> int:
