@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>抢单助手 · 管理平台</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --line:#272b34; --fg:#e8eaed; --dim:#9aa0a6; --accent:#4c8dff; --red:#d93025; --green:#1e8e3e; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif; }
+  header { display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--line); }
+  h1 { font-size:16px; margin:0; font-weight:600; }
+  .spacer { flex:1; }
+  main { padding:20px; max-width:1180px; margin:0 auto; display:grid; gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .card h2 { font-size:14px; margin:0 0 12px; color:var(--dim); font-weight:600; }
+  input, select { background:#0f1115; color:var(--fg); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:13px; }
+  button { background:#242832; color:var(--fg); border:1px solid var(--line); border-radius:8px; padding:7px 12px; font-size:13px; cursor:pointer; }
+  button:hover { background:#2e333f; }
+  button.pri { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.dan { background:#3a1d1c; border-color:#5a2a28; color:#ff9a92; }
+  button.ok  { background:#16301f; border-color:#24502f; color:#8ee6a6; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  th { color:var(--dim); font-weight:500; font-size:12px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .tag { padding:2px 8px; border-radius:99px; font-size:12px; display:inline-block; }
+  .t-ok { background:#16301f; color:#8ee6a6; }
+  .t-no { background:#3a1d1c; color:#ff9a92; }
+  .t-perm { background:#1c2b3a; color:#8fc2ff; }
+  .muted { color:var(--dim); font-size:12px; }
+  #log { white-space:pre-wrap; font-family:Consolas,monospace; font-size:12px; color:var(--dim); max-height:160px; overflow:auto; }
+  .hide { display:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>抢单助手 · 管理平台</h1>
+  <span class="spacer"></span>
+  <span id="who" class="muted"></span>
+  <button id="btnLogout" class="hide" onclick="logout()">退出</button>
+</header>
+
+<main>
+  <!-- 登录 -->
+  <section id="loginCard" class="card">
+    <h2>管理员登录</h2>
+    <div class="row">
+      <input id="api" placeholder="后端地址，如 https://xxx.vercel.app/api" style="width:420px" />
+      <input id="key" placeholder="ADMIN_KEY" type="password" style="width:220px" />
+      <button class="pri" onclick="login()">登录</button>
+    </div>
+    <p class="muted">密钥只存在浏览器本机（localStorage），不会上传到别处。</p>
+  </section>
+
+  <div id="panel" class="hide">
+    <!-- 新建账号 -->
+    <section class="card">
+      <h2>新建账号</h2>
+      <div class="row">
+        <input id="nu" placeholder="账号（如 zhangsan）" style="width:200px" />
+        <input id="np" placeholder="初始密码" style="width:180px" />
+        <select id="nd">
+          <option value="">永久</option>
+          <option value="1">1 天</option>
+          <option value="7">7 天</option>
+          <option value="30" selected>30 天</option>
+        </select>
+        <button class="pri" onclick="createUser()">创建</button>
+      </div>
+    </section>
+
+    <!-- 用户列表 -->
+    <section class="card">
+      <h2>账号与资格 <button onclick="loadUsers()" style="float:right">刷新</button></h2>
+      <table>
+        <thead><tr><th>账号</th><th>状态</th><th>到期</th><th>今日</th><th style="width:420px">操作</th></tr></thead>
+        <tbody id="users"></tbody>
+      </table>
+    </section>
+
+    <!-- 公告 -->
+    <section class="card">
+      <h2>公告</h2>
+      <div class="row">
+        <input id="at" placeholder="标题" style="width:180px" />
+        <input id="ab" placeholder="内容" style="width:520px" />
+        <select id="al"><option>info</option><option>warn</option><option>danger</option></select>
+        <button class="pri" onclick="publishAnn()">发布</button>
+      </div>
+      <table style="margin-top:12px">
+        <thead><tr><th>标题</th><th>内容</th><th>状态</th><th style="width:100px">操作</th></tr></thead>
+        <tbody id="anns"></tbody>
+      </table>
+    </section>
+
+    <section class="card"><h2>日志</h2><div id="log"></div></section>
+  </div>
+</main>
+
+<script>
+const LS = { api: 'ag_api', key: 'ag_key' };
+const $ = (id) => document.getElementById(id);
+let API = '', KEY = '';
+
+function log(msg) {
+  const el = $('log');
+  el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}\n` + el.textContent;
+}
+
+async function call(action, extra = {}) {
+  const r = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-key': KEY },
+    body: JSON.stringify({ action, ...extra }),
+  });
+  const j = await r.json().catch(() => ({ ok: false, error: '返回不是 JSON' }));
+  if (!j.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+
+function login() {
+  API = $('api').value.trim().replace(/\/$/, '');
+  KEY = $('key').value.trim();
+  if (!API || !KEY) return alert('后端地址和密钥都要填');
+  localStorage.setItem(LS.api, API);
+  localStorage.setItem(LS.key, KEY);
+  call('admin.ping').then(() => {
+    $('loginCard').classList.add('hide');
+    $('panel').classList.remove('hide');
+    $('btnLogout').classList.remove('hide');
+    $('who').textContent = API;
+    loadUsers();
+    loadAnns();
+    log('登录成功');
+  }).catch((e) => { log('登录失败：' + e.message); alert('登录失败：' + e.message); });
+}
+
+function logout() {
+  localStorage.removeItem(LS.key);
+  location.reload();
+}
+
+function fmt(iso) {
+  if (!iso) return '永久';
+  const d = new Date(iso);
+  const left = Math.ceil((d - Date.now()) / 864e5);
+  return `${d.toLocaleDateString()} （${left > 0 ? '剩 ' + left + ' 天' : '已过期'}）`;
+}
+
+async function loadUsers() {
+  try {
+    const j = await call('admin.list');
+    $('users').innerHTML = j.users.map((u) => {
+      const e = u.ent || {};
+      const active = e.status === 'active' && (!e.expire_at || new Date(e.expire_at) > new Date());
+      return `<tr>
+        <td>${u.username}</td>
+        <td>${active ? '<span class="tag t-ok">可用</span>' : '<span class="tag t-no">不可用</span>'}
+            ${!e.expire_at && e.status === 'active' ? '<span class="tag t-perm">永久</span>' : ''}</td>
+        <td class="muted">${fmt(e.expire_at)}</td>
+        <td>${u.today}/3</td>
+        <td>
+          <button class="ok" onclick="grant('${u.id}',1)">+1天</button>
+          <button class="ok" onclick="grant('${u.id}',7)">+7天</button>
+          <button class="ok" onclick="grant('${u.id}',30)">+30天</button>
+          <button class="ok" onclick="grant('${u.id}',null)">永久</button>
+          <button onclick="resetPassword('${u.id}','${u.username}')">重置密码</button>
+          <button class="dan" onclick="revoke('${u.id}')">停止使用</button>
+          <button class="dan" onclick="deleteUser('${u.id}','${u.username}')">删除账号</button>
+        </td></tr>`;
+    }).join('') || '<tr><td colspan="5" class="muted">还没有账号</td></tr>';
+    log(`已加载 ${j.users.length} 个账号`);
+  } catch (e) { log('加载失败：' + e.message); }
+}
+
+async function grant(userId, days) {
+  try {
+    await call('admin.grant', { user_id: userId, days });
+    log(`已授权 ${days ? days + ' 天' : '永久'}`);
+    loadUsers();
+  } catch (e) { alert(e.message); }
+}
+
+async function revoke(userId) {
+  if (!confirm('确认停止该账号的使用资格？')) return;
+  try { await call('admin.revoke', { user_id: userId }); log('已停止使用'); loadUsers(); }
+  catch (e) { alert(e.message); }
+}
+
+async function resetPassword(userId, username) {
+  const password = prompt(`给 ${username} 设置新密码（至少 6 位）：`);
+  if (password === null) return;
+  if (password.length < 6) return alert('密码至少 6 位');
+  try { await call('admin.resetPassword', { user_id: userId, password }); log(`已重置 ${username} 的密码`); }
+  catch (e) { alert(e.message); }
+}
+
+async function deleteUser(userId, username) {
+  if (!confirm(`确认永久删除账号「${username}」？账号、资格和抢单记录都会删除。`)) return;
+  try { await call('admin.delete', { user_id: userId }); log(`已删除 ${username}`); loadUsers(); }
+  catch (e) { alert(e.message); }
+}
+
+async function createUser() {
+  const username = $('nu').value.trim();
+  const password = $('np').value;
+  const days = $('nd').value ? Number($('nd').value) : null;
+  if (!username || !password) return alert('账号和密码都要填');
+  try {
+    await call('admin.create', { username, password, days });
+    log(`已创建 ${username}`);
+    $('nu').value = $('np').value = '';
+    loadUsers();
+  } catch (e) { alert(e.message); }
+}
+
+async function loadAnns() {
+  try {
+    const j = await call('admin.annList');
+    $('anns').innerHTML = j.items.map((a) => `<tr>
+      <td>${a.title}</td><td class="muted">${a.body}</td>
+      <td>${a.active ? '<span class="tag t-ok">生效</span>' : '<span class="tag t-no">停用</span>'}</td>
+      <td><button class="dan" onclick="delAnn(${a.id})">删除</button></td></tr>`).join('')
+      || '<tr><td colspan="4" class="muted">暂无公告</td></tr>';
+  } catch (e) { log('公告加载失败：' + e.message); }
+}
+
+async function publishAnn() {
+  const title = $('at').value.trim(), body = $('ab').value.trim();
+  if (!title && !body) return alert('标题或内容至少填一个');
+  try {
+    await call('admin.announce', { title, body, level: $('al').value, active: true });
+    $('at').value = $('ab').value = '';
+    log('公告已发布');
+    loadAnns();
+  } catch (e) { alert(e.message); }
+}
+
+async function delAnn(id) {
+  if (!confirm('删除这条公告？')) return;
+  try { await call('admin.announce', { del: id }); loadAnns(); } catch (e) { alert(e.message); }
+}
+
+(function boot() {
+  const a = localStorage.getItem(LS.api), k = localStorage.getItem(LS.key);
+  if (a) $('api').value = a;
+  if (k) $('key').value = k;
+  if (a && k) login();
+})();
+</script>
+</body>
+</html>

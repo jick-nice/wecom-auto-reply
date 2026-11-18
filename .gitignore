@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+backend/.env*.local
+backend/.vercel/
+
+# Build and recovery artifacts
+_artifacts/
+_recover/
+build/
+*.spec
+engine_dis.txt
+
+# Local distribution packages (keep locally, build from source for releases)
+dist/
+
+# IDE and OS files
+.vscode/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db

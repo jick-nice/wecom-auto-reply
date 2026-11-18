@@ -1,0 +1,13 @@
+{
+  "name": "autograb-backend",
+  "private": true,
+  "version": "3.3.0",
+  "description": "抢单助手后端：账号资格 / 公告 / 每日额度 / 管理端（Vercel + Supabase）",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "node dev-server.js",
+    "mock": "node -e \"process.env.MOCK='1';require('./dev-server.js')\""
+  }
+}
