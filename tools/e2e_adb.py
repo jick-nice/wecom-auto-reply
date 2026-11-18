@@ -50,7 +50,7 @@ def main(text="ZhengRongFu2"):
     o.warmup()
     g = Grabber()
     s = Sender((0, 0), require_foreground=True, allow_click=True, max_clicks_per_session=3)
-    cfg = {"dispatchers": ["悲伤土豆", "朱洋", "庚收盼"], "my_name": "杨煜",
+    cfg = {"dispatchers": ["测试用户A", "测试用户D", "测试用户E"], "my_name": "测试用户F",
            "dark_thr": 150, "max_orders": 3, "orders_today": 0}
     eng = Engine(cfg, o, g, s, log=log)
     if not eng.ensure_area(force=True):

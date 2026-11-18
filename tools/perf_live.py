@@ -33,7 +33,7 @@ def main():
     o = Ocr()
     o.warmup()
     logs = []
-    cfg = {"dispatchers": ["悲伤土豆", "朱洋"], "my_name": "王琦",
+    cfg = {"dispatchers": ["测试用户A", "测试用户D"], "my_name": "测试用户C",
            "dark_thr": 150, "max_orders": 3, "orders_today": 0}
     eng = Engine(cfg, o, g, NullSender(), log=logs.append)
     eng.ensure_area(force=True)

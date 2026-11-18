@@ -136,7 +136,7 @@ class Ocr:
         from PIL import ImageDraw
         img = Image.new("RGB", (420, 52), "white")
         d = ImageDraw.Draw(img)
-        d.text((6, 10), "宜居园 3", fill="black")
+        d.text((6, 10), "测试项目 3", fill="black")
         arr = np.array(img)
         for _ in range(3):
             self.line(arr)

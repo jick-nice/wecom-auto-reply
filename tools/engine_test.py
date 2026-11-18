@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""引擎判定链验证：用真实截图当"屏幕"，不碰真窗口、不发真按键。
+"""引擎判定链验证：用合成测试图当"屏幕"，不碰真窗口、不发真按键。
 
 规则（按使用者的说明）：派单人在派单之后第一个 @ 的人，就是抢到这一单的人。
 """
@@ -21,8 +21,8 @@ IMG = np.array(Image.open(ROOT / "samples" / "s3_clean.png").convert("RGB"))
 W, H = 1658, 818
 
 # s3_clean.png 实测版式
-#   y=157 名字 朱洋   y=208 内容「宜居园 3️⃣」   y=301 于超凡 / y=360「4」
-#   y=445 王琦 / y=504「3」   y=589 于超凡 / y=648「3」   y=733 朱洋 / y=789「@王琦」
+#   y=157 名字 测试用户D   y=208 内容「测试项目 3️⃣」   y=301 测试用户B / y=360「4」
+#   y=445 测试用户C / y=504「3」   y=589 测试用户B / y=648「3」   y=733 测试用户D / y=789「@测试用户C」
 FRAME_DISPATCH = IMG[140:270]
 FRAME_AT_ME = IMG[720:818]
 FRAME_OTHER = IMG[290:400]
@@ -49,7 +49,7 @@ class FakeSender:
 
 def make_engine(frame, **over):
     cfg = {
-        "strip_h": 340, "dispatchers": ["朱洋", "庚收盼"], "my_name": "王琦",
+        "strip_h": 340, "dispatchers": ["测试用户D", "测试用户E"], "my_name": "测试用户C",
         "max_orders": 3, "orders_today": 0, "dark_thr": 150,
     }
     cfg.update(over)
@@ -85,7 +85,7 @@ def main() -> int:
     run(eng, 1)
     check("单帧不发送（等第二帧确认）", sender.sent == [])
     run(eng, 1)
-    check("派单「宜居园 3️⃣」→ 发出 '3'", sender.sent == ["3"], f"实际={sender.sent}")
+    check("派单「测试项目 3️⃣」→ 发出 '3'", sender.sent == ["3"], f"实际={sender.sent}")
     run(eng, 3)
     check("同一单不重复发", sender.sent == ["3"], f"实际={sender.sent}")
     check("发完之后进入等 @ 状态", eng.pending_dispatch is True)
@@ -94,7 +94,7 @@ def main() -> int:
     eng, sender, logs, wins, stops = make_engine(FRAME_AT_ME)
     eng.pending_dispatch, eng.pending_at = True, time.time()
     run(eng, 2)
-    check("派单后 @王琦 → 判定抢到", wins == [1], f"wins={wins}")
+    check("派单后 @测试用户C → 判定抢到", wins == [1], f"wins={wins}")
     run(eng, 3)
     check("同一条 @ 只记一次", wins == [1], f"wins={wins}")
     check("判定后清空等 @ 状态", eng.pending_dispatch is False)

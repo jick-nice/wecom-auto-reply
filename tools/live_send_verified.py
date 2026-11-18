@@ -44,7 +44,7 @@ def main():
     print("聊天区 =", area)
 
     # 复用一个空跑的 Engine 只为了拿 _input_reader / _origin
-    eng = Engine({"dispatchers": ["x"], "my_name": "杨煜"}, o, g,
+    eng = Engine({"dispatchers": ["x"], "my_name": "测试用户F"}, o, g,
                  Sender((0, 0)), log=lambda m: None)
     eng.hwnd = hwnd
     eng.area = area

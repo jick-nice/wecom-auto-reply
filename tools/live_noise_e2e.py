@@ -37,8 +37,8 @@ def main(seconds=150):
     ox, oy, cw, ch = client_rect_screen(hwnd)
 
     cfg = {
-        "dispatchers": ["悲伤土豆"],
-        "my_name": "杨煜",
+        "dispatchers": ["测试用户A"],
+        "my_name": "测试用户F",
         "max_orders": 3,
         "require_foreground": True,
         "allow_click": True,

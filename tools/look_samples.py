@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""看一眼 samples 里三张真实截图的识别结果（作为鲁棒性测试的基准）。"""
+"""看一眼 合成测试图的识别结果（作为鲁棒性测试的基准）。"""
 from __future__ import annotations
 
 import sys

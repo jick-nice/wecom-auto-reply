@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """验证：彩色 emoji 数字徽章 -> 反色 -> rec-only 能否读出数字"""
 from pathlib import Path
 import numpy as np
@@ -8,7 +8,7 @@ from rapidocr_onnxruntime import RapidOCR
 HERE = Path(__file__).resolve().parent.parent
 src = Image.open(HERE / "samples" / "s3_clean.png").convert("RGB")
 
-# 先切一大块“宜居园 3️⃣”气泡，肉眼确认坐标
+# 先切一大块“测试项目 3️⃣”气泡，肉眼确认坐标
 src.crop((60, 180, 420, 280)).resize((720, 200), Image.LANCZOS).save(HERE / "probe_bubble.png")
 
 engine = RapidOCR()

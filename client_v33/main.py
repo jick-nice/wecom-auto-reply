@@ -95,7 +95,7 @@ def selftest() -> int:
     # 5) 口令解析
     try:
         from app.numparse import reply_code
-        cases = {"正荣府扣2": "2", "宜居园 3️⃣": "3", "蔡徐坤✋🏻": "5", "蔡徐坤👌": "3"}
+        cases = {"测试项目A扣2": "2", "测试项目 3️⃣": "3", "测试内容✋🏻": "5", "测试内容👌": "3"}
         bad = []
         for t, want in cases.items():
             got = reply_code(t)
@@ -129,12 +129,12 @@ def selftest() -> int:
         from app.strictmatch import match_dispatcher as _md, order_verdict as _ov
         from app.strictnum import reply_code_strict as _rcs
 
-        disp = ["悲伤土豆"]
+        disp = ["测试用户A"]
         # 不该被当成派单人
-        should_not = ["土豆", "悲伤", "悲", "悲伤土豆丝", "于超凡", "王琦", ""]
+        should_not = ["土豆", "悲伤", "悲", "测试用户A扩展", "测试用户B", "测试用户C", ""]
         bad_disp = [n for n in should_not if _md(n, disp) is not None]
         # 应该被当成派单人
-        should_yes = ["悲伤土豆", "悲伤土豆（小编）", "悲伤土豆2"]
+        should_yes = ["测试用户A", "测试用户A（小编）", "测试用户A2"]
         miss_disp = [n for n in should_yes if _md(n, disp) is None]
 
         # 派单人闲聊不该回
@@ -142,8 +142,8 @@ def selftest() -> int:
                     "我带了3个客户", "明天见", "差不多5点回来"]
         bad_chat = [t for t in chitchat if _rcs(t) is not None]
         # 真派单必须认对
-        real = {"正荣府扣2": "2", "北风花园 7": "7", "看房叁": "3",
-                "蔡徐坤✋🏻": "5", "ZhengRongFu8": "8"}
+        real = {"测试项目A扣2": "2", "北风花园 7": "7", "看房叁": "3",
+                "测试内容✋🏻": "5", "ZhengRongFu8": "8"}
         bad_real = [(t, w, _rcs(t)) for t, w in real.items() if _rcs(t) != w]
 
         problems = []
@@ -163,15 +163,15 @@ def selftest() -> int:
 
         # 端到端判定抽查
         e2e = [
-            ("悲伤土豆", "正荣府扣2", "reply"),
-            ("悲伤土豆", "下午2点看房", "skip"),
-            ("于超凡", "正荣府扣2", "skip"),
-            ("土豆", "正荣府扣2", "skip"),
-            ("悲伤土豆丝", "正荣府扣2", "skip"),
+            ("测试用户A", "测试项目A扣2", "reply"),
+            ("测试用户A", "下午2点看房", "skip"),
+            ("测试用户B", "测试项目A扣2", "skip"),
+            ("土豆", "测试项目A扣2", "skip"),
+            ("测试用户A扩展", "测试项目A扣2", "skip"),
         ]
         bad_e2e = []
         for snd, txt, want in e2e:
-            act, _ = _ov(snd, txt, disp, "杨煜")
+            act, _ = _ov(snd, txt, disp, "测试用户F")
             if act != want:
                 bad_e2e.append((snd, txt, want, act))
         p("[OK] 端到端判定抽查" if not bad_e2e else f"[FAIL] 端到端判定: {bad_e2e}")

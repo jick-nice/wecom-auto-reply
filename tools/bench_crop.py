@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """裁剪小区域 + rec-only 的速度/准确率测试（关键可行性验证）"""
 import io, json, sys, time
 from pathlib import Path
@@ -37,11 +37,11 @@ p(f"source {src.size}")
 
 # 1) 整图
 show("FULL det+rec", src)
-# 2) 单条消息气泡（“宜居园 3️⃣”）
+# 2) 单条消息气泡（“测试项目 3️⃣”）
 bubble = src.crop((60, 185, 340, 265))
-show("bubble 宜居园 (orig)", bubble)
-show("bubble 宜居园 (x2)", bubble.resize((bubble.width * 2, bubble.height * 2), Image.LANCZOS))
-show("bubble 宜居园 rec-only x2", bubble.resize((bubble.width * 2, bubble.height * 2), Image.LANCZOS),
+show("bubble 测试项目 (orig)", bubble)
+show("bubble 测试项目 (x2)", bubble.resize((bubble.width * 2, bubble.height * 2), Image.LANCZOS))
+show("bubble 测试项目 rec-only x2", bubble.resize((bubble.width * 2, bubble.height * 2), Image.LANCZOS),
      use_det=False, use_cls=False, use_rec=True)
 # 3) 单个数字气泡 “3”
 d3 = src.crop((45, 470, 130, 545))

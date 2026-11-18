@@ -32,7 +32,7 @@ def main(code="4"):
     full = np.array(g.grab_window_client(hwnd, copy=True))
     area = locate.locate(full)
     ox, oy, cw, ch = client_rect_screen(hwnd)
-    eng = Engine({"dispatchers": ["x"], "my_name": "杨煜"}, o, g, Sender((0, 0)),
+    eng = Engine({"dispatchers": ["x"], "my_name": "测试用户F"}, o, g, Sender((0, 0)),
                  log=lambda m: None)
     eng.hwnd = hwnd
     eng.area = area

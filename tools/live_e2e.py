@@ -3,7 +3,7 @@
 
 分两段：
   A. 直接发一条 ASCII 测试消息 → 截屏 OCR 确认它真的出现在群里（验证发送链路）
-  B. 用真实截图里那条「宜居园 3️⃣」派单，跑完整判定链 → 确认群里出现 "3"（验证识别+决策+发送）
+  B. 用合成测试图里那条「测试项目 3️⃣」派单，跑完整判定链 → 确认群里出现 "3"（验证识别+决策+发送）
 所有截图存 _artifacts/。
 """
 from __future__ import annotations
@@ -31,7 +31,7 @@ IMG = np.array(Image.open(ROOT / "samples" / "s3_clean.png").convert("RGB"))
 
 
 class FakeGrabber:
-    """用真实截图当屏幕；只用于识别，发送走真 Sender。"""
+    """用合成测试图当屏幕；只用于识别，发送走真 Sender。"""
 
     def __init__(self, frame):
         self.frame = frame
@@ -98,7 +98,7 @@ def main() -> int:
 
     # ---------------- B. 识别 + 决策 + 发送 ----------------
     print("\n=== B. 完整抢单链路（真实派单截图 → 真实发送） ===")
-    cfg = {"dispatchers": ["朱洋", "庚收盼"], "my_name": "王琦",
+    cfg = {"dispatchers": ["测试用户D", "测试用户E"], "my_name": "测试用户C",
            "dark_thr": 150, "max_orders": 3, "orders_today": 0}
     logs, wins = [], []
 

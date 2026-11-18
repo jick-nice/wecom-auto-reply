@@ -41,7 +41,7 @@ def main(seconds=60.0):
     from app.capture import Grabber
     g = Grabber()
     ns = NullSender()
-    cfg = {"dispatchers": ["朱洋", "庚收盼", "悲伤土豆"], "my_name": "杨煜",
+    cfg = {"dispatchers": ["测试用户D", "测试用户E", "测试用户A"], "my_name": "测试用户F",
            "dark_thr": 150, "max_orders": 3, "orders_today": 0}
     eng = Engine(cfg, o, g, ns, log=lambda m: (logs.append(m), print("  ·", m)),
                  on_frame=lambda t: seen.append(t))

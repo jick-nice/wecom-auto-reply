@@ -44,7 +44,7 @@ def match_dispatcher(sender: str, dispatchers: list[str]) -> str | None:
 
 
 def at_target(text: str) -> str | None:
-    """从「@王琦」里取被 @ 的人。"""
+    """从「@测试用户C」里取被 @ 的人。"""
     m = _AT.search(text or "")
     return _base(m.group(1)) if m else None
 
@@ -339,7 +339,7 @@ class Engine:
         sender = ""
         if msg.sender_row is not None:
             # 名字只有 ~10px 高、颜色又浅，切分给的 y 范围常只覆盖笔画中段，
-            # 上下补足边距才能认对（实测「悲伤土豆」→ 补齐前「非伤十豆」）
+            # 上下补足边距才能认对（实测「测试用户A」→ 补齐前「非伤十豆」）
             sender = self.ocr.read_name(
                 segment.crop(frame, msg.sender_row, pad_x=3, pad_y=6))
         who = match_dispatcher(sender, self.cfg.get("dispatchers", []))

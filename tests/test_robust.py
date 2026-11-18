@@ -3,7 +3,7 @@
 
 三块：
   A. 口令解析：大写 / 全角 / 中文数字 / keycap emoji / 圈码 + 一堆"看着像其实不是"的干扰项
-  B. 视觉：对真实截图做 缩放 / 亮度 / 对比度 / JPEG / 模糊 / 反色（深色模式）变换
+  B. 视觉：对合成测试图做 缩放 / 亮度 / 对比度 / JPEG / 模糊 / 反色（深色模式）变换
   C. 逻辑：非派单人的闲聊、贴纸、系统消息、@消息 不能触发回复
 
 跑法：python tests\\test_robust.py
@@ -41,17 +41,17 @@ def check(name, got, want):
 # (文本, 期望数字)  期望 None = 不该被当成派单
 CASES = [
     # 正常派单
-    ("正荣府扣2", 2), ("正荣府2", 2), ("正荣府 2", 2), ("正荣府　2", 2),
-    ("双街3", 3), ("宜居园 3️⃣", 3), ("双街新家园 看房叁", 3),
-    ("89平 扣3", 3), ("3号楼 扣1", 1), ("正荣府扣伍", 5), ("正荣府扣９", 9),
+    ("测试项目A扣2", 2), ("测试项目A2", 2), ("测试项目A 2", 2), ("测试项目A　2", 2),
+    ("测试项目C3", 3), ("测试项目 3️⃣", 3), ("测试项目B 看房叁", 3),
+    ("89平 扣3", 3), ("3号楼 扣1", 1), ("测试项目A扣伍", 5), ("测试项目A扣９", 9),
     ("2️⃣", 2), ("③", 3), ("❷", 2), ("叁", 3), ("參", 3), ("叄", 3),
-    ("正荣府2️⃣", 2), ("正荣府扣2️⃣", 2),
+    ("测试项目A2️⃣", 2), ("测试项目A扣2️⃣", 2),
     ("ZHENGRONGFU2", 2), ("ZhengRongFu8", 8), ("A-3", 3), ("B3", 3),
-    ("正荣府扣２", 2),                          # 全角数字
-    ("正荣府扣 2 号楼", 2),
-    ("宜居园扣1", 1), ("宜居园1", 1), ("双街 扣3", 3),
-    ("正荣府扣2，手慢无", 2),
-    ("【正荣府】扣2", 2),
+    ("测试项目A扣２", 2),                          # 全角数字
+    ("测试项目A扣 2 号楼", 2),
+    ("测试项目扣1", 1), ("测试项目1", 1), ("测试项目C 扣3", 3),
+    ("测试项目A扣2，手慢无", 2),
+    ("【测试项目A】扣2", 2),
     # 看着像、其实不是 —— 必须返回 None
     ("前三名", None), ("排名3", None), ("第3个", None), ("3天", None),
     ("3小时", None), ("3成", None), ("约3", None), ("1/3", None),
@@ -64,14 +64,14 @@ CASES = [
     ("一共3个人", None), ("明天3点", None),
     # —— 加的这批：多数字混排 / 序号 / 单位 / 时段 ——
     ("89平 3号楼 扣2", 2),                     # 多个数字里抓「扣」那个
-    ("正荣府 2室2厅 扣3", 3),
-    ("正荣府3 89平 总价120万", 3),             # 房源号在前、后面全是干扰
+    ("测试项目A 2室2厅 扣3", 3),
+    ("测试项目A3 89平 总价120万", 3),             # 房源号在前、后面全是干扰
     ("扣2 89平 3楼", 2),
-    ("正荣府（二期）扣4", 4),                  # 全角括号
-    ("正荣府：扣5", 5),                        # 全角冒号
-    ("正荣府  扣  6", 6),                      # 多空格
-    ("【急】正荣府 扣7 手慢无", 7),
-    ("正荣府扣8（89平）", 8),
+    ("测试项目A（二期）扣4", 4),                  # 全角括号
+    ("测试项目A：扣5", 5),                        # 全角冒号
+    ("测试项目A  扣  6", 6),                      # 多空格
+    ("【急】测试项目A 扣7 手慢无", 7),
+    ("测试项目A扣8（89平）", 8),
     ("3️⃣号楼", None),                          # keycap 后面跟"号楼"仍是房号
     ("2号线", None), ("3单元", None), ("4号楼", None),
     ("2024-06-01", None), ("13800138000", None),
@@ -79,7 +79,7 @@ CASES = [
     ("价格3万5", None), ("首付3成", None),
     ("三室两厅", None), ("一共三套", None),
     ("看房叁", 3), ("看房 叁", 3), ("定房贰", 2),
-    ("正荣府扣2！", 2), ("正荣府扣③", 3),
+    ("测试项目A扣2！", 2), ("测试项目A扣③", 3),
 ]
 
 
@@ -130,7 +130,7 @@ def transform(img, kind, v):
     raise ValueError(kind)
 
 
-def has_dispatch(rows, name="朱洋", code="3"):
+def has_dispatch(rows, name="测试用户D", code="3"):
     for who, txt in rows:
         if name in (who or "") and str(reply_code(txt)) == str(code):
             return True
@@ -140,7 +140,7 @@ def has_dispatch(rows, name="朱洋", code="3"):
 def test_vision():
     base = load("s3_clean.png")
     rows = read_chat(base)
-    check("vision[原图] 找到 朱洋→3", has_dispatch(rows), True)
+    check("vision[原图] 找到 测试用户D→3", has_dispatch(rows), True)
     print("   原图识别:", [(w[:6], t) for w, t in rows if w][:4])
 
     for kind, vals in [
@@ -174,20 +174,20 @@ def build_noise_image():
     def bubble(x, y, w, h, color=(255, 255, 255)):
         d.rounded_rectangle([x, y, x + w, y + h], radius=6, fill=color)
 
-    t = "悲伤土豆 加入了群聊"
+    t = "测试用户A 加入了群聊"
     d.text(((W - d.textlength(t, font=small)) / 2, 20), t, font=small, fill=(150, 150, 150))
     bubble(70, 70, 120, 34)
-    d.text((60, 48), "于超凡", font=small, fill=(150, 150, 150))
+    d.text((60, 48), "测试用户B", font=small, fill=(150, 150, 150))
     d.text((80, 78), "3", font=font, fill=(30, 30, 30))
-    d.text((60, 140), "王琦", font=small, fill=(150, 150, 150))
+    d.text((60, 140), "测试用户C", font=small, fill=(150, 150, 150))
     d.rounded_rectangle([70, 160, 250, 340], radius=10, fill=(255, 196, 0))
     d.ellipse([110, 200, 210, 300], fill=(255, 120, 60))
-    d.text((60, 380), "于超凡", font=small, fill=(150, 150, 150))
+    d.text((60, 380), "测试用户B", font=small, fill=(150, 150, 150))
     d.rectangle([70, 400, 330, 520], fill=(205, 210, 215))
     d.text((150, 450), "[图片]", font=font, fill=(120, 120, 120))
-    d.text((60, 545), "朱洋", font=small, fill=(150, 150, 150))
+    d.text((60, 545), "测试用户D", font=small, fill=(150, 150, 150))
     bubble(70, 565, 170, 36)
-    d.text((82, 573), "宜居园3", font=font, fill=(30, 30, 30))
+    d.text((82, 573), "测试项目3", font=font, fill=(30, 30, 30))
     return np.array(im)[:, :, ::-1]
 
 
@@ -222,7 +222,7 @@ def test_engine_negative():
     msgs = segment.pair_messages(rows)
 
     fs = FakeSender()
-    eng = Engine({"dispatchers": ["朱洋"], "my_name": "我", "max_orders": 3},
+    eng = Engine({"dispatchers": ["测试用户D"], "my_name": "我", "max_orders": 3},
                  o, None, fs, log=lambda m: None)
     for _ in range(3):                      # 模拟连续 3 帧
         for m in msgs:

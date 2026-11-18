@@ -1,5 +1,5 @@
-﻿# -*- coding: utf-8 -*-
-"""诊断：在企业微信真实截图上验证「气泡底色 + 行投影」切分方案"""
+# -*- coding: utf-8 -*-
+"""诊断：在企业微信合成测试图上验证「气泡底色 + 行投影」切分方案"""
 from pathlib import Path
 import numpy as np
 from PIL import Image

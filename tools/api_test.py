@@ -32,7 +32,7 @@ def main() -> int:
 
     print("4) 报单 3 次 …")
     for i in range(3):
-        r = a.report_order(str(i + 1), "宜居园")
+        r = a.report_order(str(i + 1), "测试项目")
         print(f"   ✅ quota={r.get('quota')}")
 
     print("\n全部通过")

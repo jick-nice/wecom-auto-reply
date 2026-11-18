@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""离线管线验证：用真实截图跑「切行 → rec-only OCR → 判号码」全流程"""
+"""离线管线验证：用合成测试图跑「切行 → rec-only OCR → 判号码」全流程"""
 import sys
 import time
 from pathlib import Path

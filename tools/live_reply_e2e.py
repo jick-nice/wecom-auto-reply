@@ -58,9 +58,9 @@ def main():
     ox, oy, cw, ch = client_rect_screen(hwnd)
 
     cfg = {
-        "dispatchers": ["杨煜", "悲伤土豆"],
+        "dispatchers": ["测试用户F", "测试用户A"],
         "self_dispatch": True,        # 测试用：允许把「本机账号发的」当派单（真机模拟派单）
-        "my_name": "悲伤土豆",          # 装着我是别人，这样"杨煜发的"才有意义
+        "my_name": "测试用户A",          # 装着我是别人，这样"测试用户F发的"才有意义
         "require_foreground": True,
         "allow_click": True,
         "dark_thr": 150,
@@ -69,9 +69,9 @@ def main():
     logs = []
     eng = Engine(cfg, o, g, s, log=lambda m: (logs.append(m), print("  [eng]", m)))
 
-    # 测试专用：把自己的消息当成「杨煜」派出来的（只在内存里改，不落盘）
+    # 测试专用：把自己的消息当成「测试用户F」派出来的（只在内存里改，不落盘）
     real_match = engine_mod.match_dispatcher
-    engine_mod.match_dispatcher = lambda name, ds: "杨煜" if not (name or "").strip() else real_match(name, ds)
+    engine_mod.match_dispatcher = lambda name, ds: "测试用户F" if not (name or "").strip() else real_match(name, ds)
 
     eng.start()
     t_ready = time.time()
